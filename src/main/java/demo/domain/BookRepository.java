@@ -1,22 +1,22 @@
 package demo.domain;
 
 import java.util.Collection;
+import javax.cache.annotation.CacheDefaults;
+import javax.cache.annotation.CacheRemove;
+import javax.cache.annotation.CacheResult;
 
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-@CacheConfig(cacheNames = "books")
+@CacheDefaults(cacheName = "books")
 public interface BookRepository extends CrudRepository<Book, Long> {
 
 	@Override
-	@Cacheable
+	@CacheResult
 	Book findOne(Long aLong);
 
-	@CacheEvict
+	@CacheRemove
 	@Override
 	void delete(Long aLong);
 
