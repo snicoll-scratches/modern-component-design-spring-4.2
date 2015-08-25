@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +24,14 @@ public class BookOrderService {
 
 	private final BookOrderRepository bookOrderRepository;
 
+	private final ApplicationEventPublisher eventPublisher;
+
 	@Autowired
-	public BookOrderService(BookRepository bookRepository, BookOrderRepository bookOrderRepository) {
+	public BookOrderService(BookRepository bookRepository, BookOrderRepository bookOrderRepository,
+			ApplicationEventPublisher eventPublisher) {
 		this.bookRepository = bookRepository;
 		this.bookOrderRepository = bookOrderRepository;
+		this.eventPublisher = eventPublisher;
 	}
 
 	@Transactional
@@ -37,12 +43,12 @@ public class BookOrderService {
 		BookOrder order = new BookOrder(book.getIsbn(), customerId);
 		this.bookOrderRepository.save(order);
 		logger.info("Created " + order + " successfully");
-		BookOrderStatus status = verifyBookOrder(order);
-		logger.info(String.format("Book order '%s' has now status '%s'", status.getOrderId(), status.getStatus()));
+		this.eventPublisher.publishEvent(order);
 		return order;
 	}
 
-	private BookOrderStatus verifyBookOrder(BookOrder bookOrder) {
+	@EventListener
+	public BookOrderStatus verifyBookOrder(BookOrder bookOrder) {
 		try {
 			// Don't do this at home
 			Thread.sleep(2000);
@@ -52,5 +58,10 @@ public class BookOrderService {
 			throw new IllegalStateException("Ooops", o_O);
 		}
 
+	}
+
+	@EventListener
+	public void handleBookOrderStatus(BookOrderStatus status) {
+		logger.info(String.format("Book order '%s' has now status '%s'", status.getOrderId(), status.getStatus()));
 	}
 }
