@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.rest.core.event.AfterCreateEvent;
 import org.springframework.stereotype.Service;
@@ -29,14 +30,29 @@ public class App {
 				new MutableConfiguration<>().setStatisticsEnabled(true));
 	}
 
-	@Bean
-	public Queue bookOrder() {
-		return new Queue("bookOrder");
+	interface MessagingConfig<T> {
+
+		@Bean
+		default T bookOrder() {
+			return createQueue("bookOrder");
+		}
+
+		@Bean
+		default T bookOrderStatus() {
+			return createQueue("bookOrderStatus");
+		}
+
+		T createQueue(String name);
+
 	}
 
-	@Bean
-	public Queue bookOrderStatus() {
-		return new Queue("bookOrderStatus");
+	@Configuration
+	static class RabbitConfig implements MessagingConfig<Queue> {
+
+		@Override
+		public Queue createQueue(String name) {
+			return new Queue(name);
+		}
 	}
 
 	@Service
