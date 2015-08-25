@@ -10,8 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsMessagingTemplate;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,14 +25,14 @@ public class BookOrderService {
 
 	private final BookOrderRepository bookOrderRepository;
 
-	private final ApplicationEventPublisher eventPublisher;
+	private final JmsMessagingTemplate messagingTemplate;
 
 	@Autowired
 	public BookOrderService(BookRepository bookRepository, BookOrderRepository bookOrderRepository,
-			ApplicationEventPublisher eventPublisher) {
+			JmsMessagingTemplate messagingTemplate) {
 		this.bookRepository = bookRepository;
 		this.bookOrderRepository = bookOrderRepository;
-		this.eventPublisher = eventPublisher;
+		this.messagingTemplate = messagingTemplate;
 	}
 
 	@Transactional
@@ -43,11 +44,12 @@ public class BookOrderService {
 		BookOrder order = new BookOrder(book.getIsbn(), customerId);
 		this.bookOrderRepository.save(order);
 		logger.info("Created " + order + " successfully");
-		this.eventPublisher.publishEvent(order);
+		this.messagingTemplate.convertAndSend("bookOrder", order);
 		return order;
 	}
 
-	@EventListener
+	@JmsListener(destination = "bookOrder")
+	@SendTo("bookOrderStatus")
 	public BookOrderStatus verifyBookOrder(BookOrder bookOrder) {
 		try {
 			// Don't do this at home
@@ -60,7 +62,7 @@ public class BookOrderService {
 
 	}
 
-	@EventListener
+	@JmsListener(destination = "bookOrderStatus")
 	public void handleBookOrderStatus(BookOrderStatus status) {
 		logger.info(String.format("Book order '%s' has now status '%s'", status.getOrderId(), status.getStatus()));
 	}
