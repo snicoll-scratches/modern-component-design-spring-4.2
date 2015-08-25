@@ -9,9 +9,9 @@ import demo.domain.BookRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +25,11 @@ public class BookOrderService {
 
 	private final BookOrderRepository bookOrderRepository;
 
-	private final JmsMessagingTemplate messagingTemplate;
+	private final RabbitMessagingTemplate messagingTemplate;
 
 	@Autowired
 	public BookOrderService(BookRepository bookRepository, BookOrderRepository bookOrderRepository,
-			JmsMessagingTemplate messagingTemplate) {
+			RabbitMessagingTemplate messagingTemplate) {
 		this.bookRepository = bookRepository;
 		this.bookOrderRepository = bookOrderRepository;
 		this.messagingTemplate = messagingTemplate;
@@ -48,7 +48,7 @@ public class BookOrderService {
 		return order;
 	}
 
-	@JmsListener(destination = "bookOrder")
+	@RabbitListener(queues = "bookOrder")
 	@SendTo("bookOrderStatus")
 	public BookOrderStatus verifyBookOrder(BookOrder bookOrder) {
 		try {
@@ -62,7 +62,7 @@ public class BookOrderService {
 
 	}
 
-	@JmsListener(destination = "bookOrderStatus")
+	@RabbitListener(queues = "bookOrderStatus")
 	public void handleBookOrderStatus(BookOrderStatus status) {
 		logger.info(String.format("Book order '%s' has now status '%s'", status.getOrderId(), status.getStatus()));
 	}

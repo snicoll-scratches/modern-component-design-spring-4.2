@@ -1,10 +1,9 @@
 package demo;
 
-import org.hornetq.jms.server.config.JMSQueueConfiguration;
-import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.amqp.core.Queue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,13 +19,13 @@ public class App {
 	}
 
 	@Bean
-	public JMSQueueConfiguration bookOrder() {
-		return new JMSQueueConfigurationImpl("bookOrder", null, false);
+	public Queue bookOrder() {
+		return new Queue("bookOrder");
 	}
 
 	@Bean
-	public JMSQueueConfiguration bookOrderStatus() {
-		return new JMSQueueConfigurationImpl("bookOrderStatus", null, false);
+	public Queue bookOrderStatus() {
+		return new Queue("bookOrderStatus");
 	}
 
 	@Service
