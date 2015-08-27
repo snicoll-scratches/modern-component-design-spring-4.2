@@ -3,9 +3,8 @@ package demo.order;
 import demo.domain.Book;
 import demo.domain.BookNotFoundException;
 import demo.domain.BookOrder;
-import demo.domain.BookOrderRepository;
 import demo.domain.BookOrderStatus;
-import demo.domain.BookRepository;
+import demo.domain.MyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,14 +20,15 @@ public class BookOrderService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BookOrderService.class);
 
-	private final BookRepository bookRepository;
+	private final MyRepository<Book> bookRepository;
 
-	private final BookOrderRepository bookOrderRepository;
+	private final MyRepository<BookOrder> bookOrderRepository;
 
 	private final RabbitMessagingTemplate messagingTemplate;
 
 	@Autowired
-	public BookOrderService(BookRepository bookRepository, BookOrderRepository bookOrderRepository,
+	public BookOrderService(MyRepository<Book> bookRepository,
+			MyRepository<BookOrder> bookOrderRepository,
 			RabbitMessagingTemplate messagingTemplate) {
 		this.bookRepository = bookRepository;
 		this.bookOrderRepository = bookOrderRepository;

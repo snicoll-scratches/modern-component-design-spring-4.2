@@ -5,12 +5,11 @@ import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResult;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 @CacheDefaults(cacheName = "books")
-public interface BookRepository extends CrudRepository<Book, Long> {
+public interface BookRepository extends MyRepository<Book> {
 
 	@Override
 	@CacheResult
