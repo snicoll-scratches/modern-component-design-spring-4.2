@@ -3,6 +3,7 @@ package demo.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import demo.annotation.Post;
 import demo.domain.BookNotFoundException;
 import demo.domain.BookOrder;
 import demo.order.BookOrderService;
@@ -13,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +30,7 @@ public class BookController {
 		this.entityLinks = entityLinks;
 	}
 
-	@RequestMapping(path = "/books/{id}/order", method = RequestMethod.POST)
+	@Post("/books/{id}/order")
 	public ResponseEntity<?> order(@PathVariable Long id) throws URISyntaxException {
 		BookOrder order = this.bookOrderService.order(id, 42L);
 		URI location = new URI(entityLinks.linkToSingleResource(BookOrder.class, order.getId()).getHref());
